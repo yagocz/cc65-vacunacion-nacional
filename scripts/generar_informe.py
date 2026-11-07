@@ -619,10 +619,17 @@ def main():
         ["main", "Versión estable del entregable"],
     ], [2.4, 3.9])
     parr(doc,
-        "El seguimiento de actividades se realiza mediante un tablero Kanban en GitHub con doce "
-        "tareas que cubren los tres entregables del trabajo final. Las seis correspondientes a la "
-        "PC3 se encuentran cerradas, cada una con la evidencia de su ejecución asociada; las seis "
-        "restantes permanecen abiertas y corresponden a la PC4 y al TB2.")
+        "El seguimiento de actividades se realiza mediante un tablero Kanban público en GitHub "
+        "Projects, con doce tareas que cubren los tres entregables del trabajo final. Las siete "
+        "correspondientes a la PC3 se encuentran en la columna Done, cada una con la evidencia de "
+        "su ejecución asociada; las cinco restantes permanecen en Todo y corresponden a la PC4 y "
+        "al TB2. El tablero está vinculado al repositorio, de modo que el cierre de una incidencia "
+        "actualiza automáticamente su posición en el flujo.")
+    figura(doc, "06_tablero_kanban.png",
+           "Figura 6. Tablero Kanban del proyecto: 7 tareas completadas (PC3) y 5 pendientes "
+           "(PC4 y TB2).")
+    doc.add_paragraph()
+    parr(doc, "Tablero: https://github.com/users/yagocz/projects/1", cursiva=True)
     doc.add_page_break()
 
     # ---------------- 6. CONCLUSIONES ----------------
