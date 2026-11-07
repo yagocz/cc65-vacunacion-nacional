@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------
+# Trabajo Final CC65 — Caso 7: Vacunación Nacional
+# ---------------------------------------------------------------
+
+# Dataset original del MINSA (9.91 GB) — se descarga con scripts/descargar.sh
+data/raw/
+
+# Dataset vectorizado (1.79 GB) — se regenera con go run ./etiquetado
+data/processed/*.bin
+
+# Binarios compilados
+bin/
+*.exe
+
+# Go
+vendor/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Excepciones: evidencias del informe SÍ se versionan
+!docs/*.json
+!docs/*.txt
+!docs/capturas/*.png
