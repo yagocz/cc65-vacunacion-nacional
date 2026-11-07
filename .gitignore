@@ -26,3 +26,5 @@ desktop.ini
 !docs/*.json
 !docs/*.txt
 !docs/capturas/*.png
+*.zip
+~$*
