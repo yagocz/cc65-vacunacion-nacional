@@ -20,7 +20,8 @@ DOCS = RAIZ / "docs"
 CAPS = DOCS / "capturas"
 SALIDA = RAIZ / "1ACC0065_PC3_202620_Informe_U202412543.docx"
 
-AZUL = RGBColor(0x1F, 0x4E, 0x79)
+NEGRO = RGBColor(0x00, 0x00, 0x00)
+AZUL = RGBColor(0x00, 0x00, 0x00)  # titulos en negro, como la plantilla
 GRIS = RGBColor(0x44, 0x44, 0x44)
 
 hist = json.loads((DOCS / "historial_entrenamiento.json").read_text(encoding="utf-8"))
@@ -99,47 +100,61 @@ def main():
         s.left_margin = s.right_margin = Inches(1.0)
         s.top_margin = s.bottom_margin = Inches(1.0)
     est = doc.styles["Normal"]
-    est.font.name = "Calibri"
-    est.font.size = Pt(11)
+    est.font.name = "Times New Roman"
+    est.font.size = Pt(12)
+    est.element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
+
+    # Encabezados en Times New Roman y negro, como la plantilla oficial.
+    for nivel in (1, 2, 3):
+        hs = doc.styles[f"Heading {nivel}"]
+        hs.font.name = "Times New Roman"
+        hs.font.color.rgb = NEGRO
+        hs.font.bold = True
+        hs.font.size = Pt(15 - nivel)
 
     # ---------------- CARÁTULA ----------------
+    # Replica el formato de la plantilla oficial: Times New Roman 14,
+    # centrado, en negro, con el logo institucional.
+    def cen(texto, size=14, bold=False, space=0):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(space)
+        r = p.add_run(texto)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(size)
+        r.bold = bold
+        r.font.color.rgb = NEGRO
+        return p
+
+    doc.add_paragraph()
+    logo = DOCS / "logo_upc.png"
+    if logo.exists():
+        doc.add_picture(str(logo), width=Inches(1.17))
+        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    doc.add_paragraph()
+    cen("INFORME DE EVALUACIÓN DE DESEMPEÑO", 14, True, 12)
+    doc.add_paragraph()
+    cen("CC65 Programación Concurrente y Distribuida", 14, False, 0)
+    cen("Carrera de Ciencias de la Computación", 14, False, 12)
+    doc.add_paragraph()
+    cen("Sección: ……", 14, False, 12)
+    doc.add_paragraph()
+    cen("Docente: Ms. Carlos Jara García", 14, False, 12)
+    doc.add_paragraph()
+    doc.add_paragraph()
+    cen("Alumnos:", 14, False, 6)
+    cen("U202215375 — Ricardo Rafael Rivas Carrillo", 12, False, 0)
+    cen("U202412543 — Ernesto Yago Caldas Zapata", 12, False, 0)
+    cen("U202220230 — Andre Angel Chipana Rios", 12, False, 12)
+    doc.add_paragraph()
+    cen("Entregable 1 — PC3", 14, True, 0)
+    cen("Caso 7: Clasificación y Seguimiento de la Vacunación Nacional", 12, False, 0)
+
     for _ in range(4):
         doc.add_paragraph()
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("INFORME DE EVALUACIÓN DE DESEMPEÑO")
-    r.bold = True; r.font.size = Pt(20); r.font.color.rgb = AZUL
-
-    doc.add_paragraph()
-    for txt, sz, bold in [
-        ("CC65 Programación Concurrente y Distribuida", 14, True),
-        ("Carrera de Ciencias de la Computación", 12, False),
-    ]:
-        p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r = p.add_run(txt); r.font.size = Pt(sz); r.bold = bold
-
-    doc.add_paragraph()
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("Entregable 1 — PC3\nTrabajo Final: Caso 7\nClasificación y Seguimiento de la Vacunación Nacional")
-    r.bold = True; r.font.size = Pt(13); r.font.color.rgb = AZUL
-
-    doc.add_paragraph()
-    for txt in ["Sección: ……", "Docente: Ms. Carlos Jara García"]:
-        p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.add_run(txt).font.size = Pt(11)
-
-    doc.add_paragraph()
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("Integrantes"); r.bold = True; r.font.size = Pt(12)
-    tabla(doc, ["Código", "Nombres y apellidos"], [
-        ["U202215375", "Ricardo Rafael Rivas Carrillo"],
-        ["U202412543", "Ernesto Yago Caldas Zapata"],
-        ["U202220230", "Andre Angel Chipana Rios"],
-    ], [1.6, 4.4])
-
-    for _ in range(3):
-        doc.add_paragraph()
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("2026-20\nLima, Perú"); r.font.size = Pt(12)
+    cen("2026-20", 14, False, 0)
+    cen("Lima, Perú", 14, False, 0)
     doc.add_page_break()
 
     # ---------------- ÍNDICE ----------------
