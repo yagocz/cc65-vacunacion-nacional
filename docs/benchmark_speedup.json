@@ -1,0 +1,45 @@
+{
+  "corridas": 10,
+  "features": 15,
+  "muestras": 30816349,
+  "numcpu": 12,
+  "resultados": [
+    {
+      "workers": 2,
+      "ms_recortada": 1070.3605,
+      "speedup": 1.9865805726201593,
+      "eficiencia": 0.9932902863100797
+    },
+    {
+      "workers": 4,
+      "ms_recortada": 548.2255,
+      "speedup": 3.8786181507427147,
+      "eficiencia": 0.9696545376856787
+    },
+    {
+      "workers": 6,
+      "ms_recortada": 383.87675,
+      "speedup": 5.539166868011673,
+      "eficiencia": 0.9231944780019455
+    },
+    {
+      "workers": 8,
+      "ms_recortada": 307.12512499999997,
+      "speedup": 6.923423718590266,
+      "eficiencia": 0.8654279648237833
+    },
+    {
+      "workers": 12,
+      "ms_recortada": 236.121,
+      "speedup": 9.005371716196358,
+      "eficiencia": 0.7504476430163631
+    },
+    {
+      "workers": 16,
+      "ms_recortada": 275.50037499999996,
+      "speedup": 7.7181650841673095,
+      "eficiencia": 0.48238531776045684
+    }
+  ],
+  "secuencial": 2126.357375
+}
