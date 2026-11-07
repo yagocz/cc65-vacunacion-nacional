@@ -1,0 +1,42 @@
+==============================================================
+ETIQUETADO Y VECTORIZACIÓN — deserción en 2ª/3ª dosis
+==============================================================
+  workers      : 12
+  ventana      : 180 días sin dosis siguiente = deserción
+--------------------------------------------------------------
+  archivo      : 9.91 GB en 12 bloques
+
+==============================================================
+RESULTADO DEL ETIQUETADO
+==============================================================
+  tiempo total        : 21.90 s   (agregación 16.66 s)
+  fecha de corte      : día 20422 desde epoch
+
+  PERSONAS ÚNICAS     : 30,968,883
+  dosis totales       : 93,675,827
+  dosis por persona   : 3.02
+
+--------------------------------------------------------------
+DISTRIBUCIÓN POR DOSIS MÁXIMA ALCANZADA
+--------------------------------------------------------------
+  1 dosis :      1,870,917    6.04%
+  2 dosis :      6,493,483   20.97%
+  3 dosis :     14,046,903   45.36%
+  4 dosis :      4,710,814   15.21%
+  5 dosis :      3,535,252   11.42%
+  6 dosis :        305,353    0.99%
+  8 dosis :          5,663    0.02%
+  9 dosis :            498    0.00%
+
+--------------------------------------------------------------
+ETIQUETA BINARIA (variable objetivo)
+--------------------------------------------------------------
+  DESERTÓ    (y=1)    :      8,339,819   27.06%
+  COMPLETÓ   (y=0)    :     22,476,530   72.94%
+  etiquetadas         :     30,816,349
+  excluidas (censura) :        152,534    0.49%
+
+  SUPERA 1,000,000 registros etiquetados: SÍ
+
+  dataset vectorizado : ../data/processed/muestras.bin  (1792.71 MB, 15 features)
+==============================================================
