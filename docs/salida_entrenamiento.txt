@@ -1,0 +1,116 @@
+=== compilando ===
+=== lanzando coordinador (puerto 9000) ===
+==============================================================
+COORDINADOR — Regresión Logística Distribuida (Parameter Server)
+==============================================================
+  dataset   : ../data/processed/muestras.bin
+  muestras  : 30,816,349  (1.75 GB)
+  features  : 15
+  nodos     : 4
+  rondas    : 300   |  lr: 2.000  |  L2: 1e-06
+--------------------------------------------------------------
+  escuchando en :9000 — esperando 4 nodos...
+
+=== lanzando 4 nodos (3 goroutines cada uno) ===
+[nodo 1] conectado a localhost:9000  (hilos internos: 3)
+  [+] nodo 1 conectado desde [::1]:51582  (1/4)
+[nodo 2] conectado a localhost:9000  (hilos internos: 3)
+  [+] nodo 2 conectado desde [::1]:51583  (2/4)
+[nodo 3] conectado a localhost:9000  (hilos internos: 3)
+  [+] nodo 3 conectado desde [::1]:51584  (3/4)
+[nodo 4] conectado a localhost:9000  (hilos internos: 3)
+  [+] nodo 4 conectado desde [::1]:51585  (4/4)
+
+[nodo 1] shard cargado: 7,704,088 muestras [0, 7704088) en 0.38 s
+[nodo 2] shard cargado: 7,704,087 muestras [7704088, 15408175) en 0.39 s
+[nodo 3] shard cargado: 7,704,087 muestras [15408175, 23112262) en 0.40 s
+[nodo 4] shard cargado: 7,704,087 muestras [23112262, 30816349) en 0.40 s
+  todos los shards cargados en 0.40 s
+    nodo 1 :      7,704,088 muestras
+    nodo 2 :      7,704,087 muestras
+    nodo 3 :      7,704,087 muestras
+    nodo 4 :      7,704,087 muestras
+
+--------------------------------------------------------------
+ENTRENAMIENTO
+--------------------------------------------------------------
+  ronda          pérdida           ‖∇L‖         ms
+  1           0.69314718     0.44094809      266.3
+  2           0.57925656     0.19794949      255.3
+  3           0.53368768     0.09088537      283.1
+  4           0.51909601     0.07515951      245.2
+  5           0.50864585     0.06466007      249.4
+  10          0.48301502     0.03749560      238.8
+  20          0.46514451     0.02506306      251.5
+  30          0.45396878     0.02248318      240.3
+  40          0.44444559     0.02117091      236.2
+  50          0.43588311     0.02019081      232.0
+  60          0.42804776     0.01936895      244.1
+  70          0.42081124     0.01864703      231.3
+  80          0.41408718     0.01799753      245.1
+  90          0.40781111     0.01740516      257.8
+  100         0.40193180     0.01686035      232.5
+  110         0.39640690     0.01635653      231.5
+  120         0.39120053     0.01588875      249.5
+  130         0.38628188     0.01545305      232.1
+  140         0.38162419     0.01504612      233.7
+  150         0.37720408     0.01466512      233.4
+  160         0.37300099     0.01430757      242.4
+  170         0.36899680     0.01397130      258.7
+  180         0.36517546     0.01365438      276.6
+  190         0.36152267     0.01335510      289.1
+  200         0.35802570     0.01307194      233.2
+  210         0.35467316     0.01280354      238.1
+  220         0.35145480     0.01254869      236.3
+  230         0.34836142     0.01230630      235.2
+  240         0.34538470     0.01207539      299.8
+  250         0.34251710     0.01185507      232.7
+  260         0.33975179     0.01164457      288.5
+  270         0.33708252     0.01144316      233.9
+  280         0.33450362     0.01125021      228.9
+  290         0.33200989     0.01106511      231.6
+  300         0.32959655     0.01088734      256.8
+
+--------------------------------------------------------------
+EVALUACIÓN (matriz de confusión global, umbral 0.5)
+--------------------------------------------------------------
+  muestras evaluadas : 30,816,349
+  VP=4,765,291  VN=21,375,980  FP=1,100,550  FN=3,574,528
+
+  Exactitud     : 0.8483
+  Precisión     : 0.8124
+  Exhaustividad : 0.5714
+  F1            : 0.6709
+  Pérdida media : 0.329359
+
+--------------------------------------------------------------
+PESOS APRENDIDOS  (signo + = mayor probabilidad de deserción)
+--------------------------------------------------------------
+  sesgo                       +0.552223
+  edad_norm                   -0.456971
+  sexo_M                      +0.342234
+  sexo_F                      +0.209902
+  dias_desde_1a_dosis         -1.969133
+  intervalo_1a_ultima         -9.294888
+  fuera_de_lima               +0.402091
+  grupo_priorizado            +0.177468
+  fab_PFIZER                  +0.124011
+  fab_SINOPHARM               +0.005627
+  fab_ASTRAZENECA             -0.046374
+  fab_no_registrado           +0.484801
+  depto_LIMA                  +0.150046
+  menor_18                    +1.176088
+  mayor_60                    +0.210873
+
+==============================================================
+  tiempo de entrenamiento : 75.15 s  (300 rondas)
+  tiempo por ronda        : 250.5 ms
+  throughput              : 123,019,463 muestras/s
+==============================================================
+
+  historial guardado en ../docs/historial_entrenamiento.json
+[nodo 1] fin: 300 rondas en 76.03 s
+[nodo 2] fin: 300 rondas en 76.03 s
+[nodo 3] fin: 300 rondas en 76.02 s
+[nodo 4] fin: 300 rondas en 76.02 s
+=== clúster finalizado ===
