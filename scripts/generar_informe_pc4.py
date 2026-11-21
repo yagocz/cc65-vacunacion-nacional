@@ -23,7 +23,9 @@ from docx.shared import Inches, Pt, RGBColor
 RAIZ = Path(__file__).resolve().parents[1]
 DOCS = RAIZ / "docs"
 CAPS = DOCS / "capturas"
-SALIDA = RAIZ / "1ACC0065_PC4_202620_Informe_U202412543.docx"
+import os as _os
+SALIDA = Path(_os.environ.get("INFORME_SALIDA",
+    str(RAIZ / "1ACC0065_PC4_202620_Informe_U202412543.docx")))
 
 NEGRO = RGBColor(0, 0, 0)
 
@@ -662,9 +664,18 @@ def main():
     # ---------------- 10. EVIDENCIAS ----------------
     h(doc, "10. EVIDENCIAS DE LA IMPLEMENTACIÓN Y PRUEBAS", 1)
     parr(doc,
-        "El script scripts/pruebas_api.sh ejecuta once pruebas sobre el servicio desplegado y deja "
-        "su salida en docs/salida_pruebas_api.txt. Equivale a la colección de Postman que menciona "
-        "el enunciado, con la ventaja de ser reproducible desde la terminal.")
+        "El enunciado pide verificar el servicio con Postman. Para ello se preparó la colección "
+        "docs/postman/CC65_Vacunacion_API.postman_collection.json, con doce solicitudes que "
+        "recorren todos los endpoints expuestos. Cada una lleva asociada una aserción automática "
+        "que comprueba el código de respuesta, la forma del cuerpo devuelto y, en los doce casos, "
+        "que el tiempo de respuesta sea inferior a 100 milisegundos. De este modo la ejecución "
+        "completa de la colección produce en una sola pantalla la evidencia del cumplimiento del "
+        "requisito de latencia.")
+    parr(doc,
+        "En paralelo, el script scripts/pruebas_api.sh reproduce las mismas comprobaciones desde "
+        "la terminal y añade una medición de latencia sobre 200 solicitudes consecutivas. Su "
+        "salida queda registrada en docs/salida_pruebas_api.txt, de forma que la verificación no "
+        "depende de una herramienta gráfica y puede repetirse en una canalización automatizada.")
     tabla(doc, ["#", "Prueba", "Resultado"], [
         ["1", "GET /api/salud sin autenticación", "200, los tres componentes activos"],
         ["2", "POST /api/login con credenciales válidas", "200, token de 176 caracteres"],
@@ -685,6 +696,20 @@ def main():
         "Lima con seguimiento sostenido obtiene 0.1151. La diferencia es coherente con los "
         "coeficientes aprendidos durante el entrenamiento, donde la condición de menor de "
         "dieciocho años presentaba el peso positivo más alto.")
+    doc.add_paragraph()
+    figura(doc, "13_postman.png",
+           "Figura 8. Ejecución de la colección de Postman: las doce solicitudes superan sus "
+           "aserciones y responden por debajo del umbral de 100 ms.")
+    parr(doc,
+        "Las solicitudes séptima y octava merecen una precisión metodológica. Están destinadas a "
+        "demostrar el funcionamiento de la caché: la primera debe resolverse en el modelo y la "
+        "segunda recuperarse de Redis. Una versión anterior de la prueba consultaba un perfil "
+        "fijo que ya había sido almacenado por una comprobación previa del mismo script, con lo "
+        "que ambas llamadas devolvían el indicador de acierto en caché. La prueba informaba "
+        "éxito, pero no demostraba el comportamiento que afirmaba verificar. Se corrigió "
+        "mediante un script de pre-solicitud que genera un perfil con edad e intervalo "
+        "aleatorios, y solo entonces la evidencia mostró la secuencia real de fallo seguido de "
+        "acierto, con probabilidad idéntica en ambas respuestas.")
     doc.add_page_break()
 
     # ---------------- 11. GITHUB ----------------
@@ -701,6 +726,7 @@ def main():
         ["feature/informe-gaps", "Informe y evidencias", "PC3"],
         ["feature/api-coordinadora", "API REST/WebSocket, JWT, Swagger, caché", "PC4"],
         ["feature/docker-persistencia", "Docker Compose, MongoDB, Redis", "PC4"],
+        ["feature/postman", "Colección de pruebas de la API", "PC4"],
     ], [2.2, 3.0, 1.0])
     parr(doc,
         "El tablero Kanban de GitHub Projects registra doce tareas que cubren los tres "
@@ -708,7 +734,7 @@ def main():
         "correspondientes al frontend y la evaluación experimental del TB2.")
     parr(doc, "Tablero: https://github.com/users/yagocz/projects/1", cursiva=True)
     figura(doc, "06_tablero_kanban.png",
-           "Figura 8. Tablero Kanban con el seguimiento de las tareas del proyecto.")
+           "Figura 9. Tablero Kanban con el seguimiento de las tareas del proyecto.")
     doc.add_page_break()
 
     # ---------------- 12. CONCLUSIONES ----------------

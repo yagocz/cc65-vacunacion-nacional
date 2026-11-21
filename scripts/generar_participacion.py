@@ -16,7 +16,9 @@ from docx import Document
 
 RAIZ = Path(__file__).resolve().parents[1]
 PLANTILLA = Path(r"C:\Users\Yago Caldas\Downloads\CC65-Participación-202620 .docx")
-SALIDA = RAIZ / "CC65-Participación-202620-PC4.docx"
+import os as _os
+SALIDA = Path(_os.environ.get("PARTICIPACION_SALIDA",
+    str(RAIZ / "CC65-Participación-202620-PC4.docx")))
 
 # --------------------------------------------------------------------------
 # Reparto de responsabilidades: cuatro por integrante, equivalentes en carga.
@@ -48,8 +50,9 @@ RESPONSABILIDADES = {
         "malla y anillo frente a las necesidades del descenso de gradiente distribuido.",
         "Documentación de la API con OpenAPI 3.0: definición de los siete esquemas de datos y de "
         "los ejemplos de solicitud de cada endpoint.",
-        "Ejecución de las pruebas de latencia sobre el servicio contenerizado y verificación del "
-        "cumplimiento del requisito de responder en menos de 100 milisegundos.",
+        "Elaboración de la colección de Postman con las doce solicitudes de prueba y su aserción "
+        "de latencia, y verificación del cumplimiento del requisito de responder en menos de "
+        "100 milisegundos sobre el servicio contenerizado.",
         "Redacción de las secciones de distribución y protocolo de comunicación TCP del informe.",
     ],
 }
@@ -58,7 +61,7 @@ COMENTARIO = """Los tres integrantes cumplieron con las responsabilidades asigna
 
 En esta entrega se completaron la Parte C de la arquitectura —la API coordinadora REST y WebSocket— junto con los dos niveles de almacenamiento y el despliegue contenerizado del sistema. El servicio expone el modelo entrenado sobre 30,816,349 registros y responde con una latencia media de 3.48 milisegundos; el percentil 99 es de 5.39 milisegundos, aproximadamente dieciocho veces por debajo del umbral de 100 milisegundos que fija el enunciado.
 
-Ricardo Rivas se encargó de justificar la topología de red del clúster, comparando las alternativas de estrella, malla y anillo frente a las necesidades del descenso de gradiente distribuido, y documentó la API en OpenAPI 3.0. También ejecutó las pruebas de latencia sobre el servicio contenerizado.
+Ricardo Rivas se encargó de justificar la topología de red del clúster, comparando las alternativas de estrella, malla y anillo frente a las necesidades del descenso de gradiente distribuido, y documentó la API en OpenAPI 3.0. También preparó la colección de Postman que el enunciado solicita, con doce solicitudes que recorren todos los endpoints y comprueban automáticamente que ninguna supere los 100 milisegundos.
 
 Ernesto Yago Caldas Zapata desarrolló la API en Go con autenticación JWT y canal WebSocket conforme al RFC 6455, implementó los clientes de MongoDB y Redis sobre la biblioteca estándar —con los protocolos OP_MSG y RESP escritos para el proyecto, en lugar de incorporar los SDK oficiales— y orquestó el despliegue con Docker Compose.
 
