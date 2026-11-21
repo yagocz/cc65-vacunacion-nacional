@@ -1,0 +1,22 @@
+TABLERO KANBAN — CC65 Vacunacion Nacional (Caso 7)
+https://github.com/users/yagocz/projects/1
+
+Done (10)
+--------------------------------------------------------------
+  #1   Parte A: cargador concurrente del CSV del MINSA
+  #2   Etiquetado de desercion por trayectoria de UUID
+  #3   Parte B: protocolo TCP coordinador-nodos
+  #4   Parte B: nodo de computo del cluster
+  #5   Parte B: coordinador del cluster
+  #6   Benchmark de speedup y eficiencia
+  #7   Informe PC3
+  #8   Parte C: API REST/WebSocket coordinadora
+  #9   Persistencia: MongoDB y Redis
+  #10  Dockerizacion y docker-compose
+
+Todo (2)
+--------------------------------------------------------------
+  #11  Parte D: frontend SPA
+  #12  Evaluacion experimental y video
+
+Done = PC3 + PC4 completadas   |   Todo = TB2 (29-nov)
