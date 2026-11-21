@@ -1,0 +1,21 @@
+==============================================================
+DESPLIEGUE CON DOCKER COMPOSE
+==============================================================
+$ docker compose ps
+NAME          IMAGE                 STATUS                        PORTS
+vac-api       cc65-vacunacion-api   Up 56 seconds (healthy)       0.0.0.0:8090->8080/tcp, [::]:8090->8080/tcp
+vac-mongodb   mongo:7               Up About a minute (healthy)   0.0.0.0:27017->27017/tcp, [::]:27017->27017/tcp
+vac-redis     redis:7-alpine        Up About a minute (healthy)   0.0.0.0:6380->6379/tcp, [::]:6380->6379/tcp
+
+--------------------------------------------------------------
+$ docker compose config --services
+mongodb
+redis
+api
+
+--------------------------------------------------------------
+Red interna del cluster:
+  vac-redis  172.25.0.2/16
+  vac-api  172.25.0.4/16
+  vac-mongodb  172.25.0.3/16
+

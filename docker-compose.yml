@@ -1,0 +1,154 @@
+# Despliegue completo del sistema — CC65 Trabajo Final (Caso 7)
+#
+# Levanta los cuatro componentes de la arquitectura en una red interna:
+#
+#   api        coordinador REST/WebSocket (Parte C)
+#   nodo1..3   nodos de cómputo del clúster ML (Parte B)
+#   mongodb    almacenamiento persistente
+#   redis      caché de respuestas precalculadas
+#
+# Los nodos se comunican con el coordinador por TCP dentro de la red
+# `clusterml`, sin exponer ese tráfico al exterior. Solo la API publica
+# puertos hacia el anfitrión.
+#
+# Uso:
+#   docker compose up --build
+#   docker compose --profile entrenamiento up   (incluye el clúster de entrenamiento)
+
+name: cc65-vacunacion
+
+services:
+
+  # ---------------------------------------------------------------------
+  # Persistencia
+  # ---------------------------------------------------------------------
+  mongodb:
+    image: mongo:7
+    container_name: vac-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: vacunacion
+    volumes:
+      - mongo_datos:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
+    ports:
+      - "27017:27017"
+    networks: [clusterml]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1}).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: vac-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly no
+    ports:
+      - "6380:6379"
+    networks: [clusterml]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ---------------------------------------------------------------------
+  # API coordinadora (Parte C)
+  # ---------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: vac-api
+    restart: unless-stopped
+    environment:
+      MONGO_DIR: mongodb:27017
+      REDIS_DIR: redis:6379
+      MODELO_RUTA: /app/docs/historial_entrenamiento.json
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./docs:/app/docs:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [clusterml]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/salud"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------
+  # Clúster de entrenamiento (Parte B) — perfil opcional
+  #
+  # El coordinador y los nodos solo se levantan cuando se pide el perfil
+  # `entrenamiento`, porque el entrenamiento es un proceso por lotes y no
+  # un servicio permanente.
+  # ---------------------------------------------------------------------
+  coordinador:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cluster
+    container_name: vac-coordinador
+    profiles: [entrenamiento]
+    command: ["/app/coordinador", "-nodos", "3", "-rondas", "100", "-lr", "2.0",
+              "-datos", "/datos/muestras.bin", "-puerto", "9000",
+              "-hist", "/app/docs/historial_entrenamiento.json"]
+    volumes:
+      - ./data/processed:/datos:ro
+      - ./docs:/app/docs
+    networks: [clusterml]
+
+  nodo1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cluster
+    container_name: vac-nodo1
+    profiles: [entrenamiento]
+    command: ["/app/nodo", "-id", "1", "-coord", "coordinador:9000", "-hilos", "3"]
+    volumes:
+      - ./data/processed:/datos:ro
+    depends_on: [coordinador]
+    networks: [clusterml]
+
+  nodo2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cluster
+    container_name: vac-nodo2
+    profiles: [entrenamiento]
+    command: ["/app/nodo", "-id", "2", "-coord", "coordinador:9000", "-hilos", "3"]
+    volumes:
+      - ./data/processed:/datos:ro
+    depends_on: [coordinador]
+    networks: [clusterml]
+
+  nodo3:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cluster
+    container_name: vac-nodo3
+    profiles: [entrenamiento]
+    command: ["/app/nodo", "-id", "3", "-coord", "coordinador:9000", "-hilos", "3"]
+    volumes:
+      - ./data/processed:/datos:ro
+    depends_on: [coordinador]
+    networks: [clusterml]
+
+networks:
+  clusterml:
+    driver: bridge
+
+volumes:
+  mongo_datos:

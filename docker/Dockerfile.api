@@ -1,0 +1,14 @@
+# API coordinadora REST/WebSocket — compilación en dos etapas.
+FROM golang:1.27-alpine AS compilacion
+WORKDIR /src
+COPY go/go.mod ./go/
+COPY go/ ./go/
+WORKDIR /src/go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /salida/api ./api
+
+FROM alpine:3.20
+RUN apk add --no-cache wget ca-certificates
+WORKDIR /app
+COPY --from=compilacion /salida/api /app/api
+EXPOSE 8080
+ENTRYPOINT ["/app/api", "-puerto", "8080"]

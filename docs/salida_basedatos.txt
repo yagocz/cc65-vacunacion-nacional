@@ -1,0 +1,47 @@
+==============================================================
+BASES DE DATOS — MongoDB (persistente) y Redis (cache)
+==============================================================
+
+### MongoDB: colecciones, indices y documentos
+colecciones: predicciones, metricas_cluster, modelos
+documentos en predicciones: 203
+
+indices:
+  _id_  {"_id":1}
+  idx_tiempo  {"marca_tiempo":-1}
+  idx_geo_riesgo  {"departamento":1,"nivel_riesgo":1}
+  idx_usuario  {"usuario":1,"marca_tiempo":-1}
+
+agregacion por nivel de riesgo:
+  MEDIO: 129 registros, probabilidad media 0.5451
+  BAJO: 73 registros, probabilidad media 0.3863
+  ALTO: 1 registros, probabilidad media 0.8767
+
+documento de ejemplo:
+{
+  _id: ObjectId('6b01cd5725b76713b8cf2db2'),
+  usuario: 'admin',
+  rol: 'administrador',
+  edad: Long('15'),
+  sexo: 'MASCULINO',
+  departamento: 'CUSCO',
+  fabricante: 'PFIZER',
+  dias_primera_dosis: Long('400'),
+  intervalo_dosis: Long('25'),
+  grupo_riesgo: false,
+  probabilidad: 0.8766865526952581,
+  clasificacion: 'DESERTARÁ',
+  nivel_riesgo: 'ALTO',
+  latencia_ms: 1.722,
+  marca_tiempo: Long('1795280215')
+}
+
+### Redis: claves en cache
+204
+pred:40:MASCULINO:LIMA:PFIZER:440:160:false
+pred:57:MASCULINO:LIMA:PFIZER:337:57:false
+pred:79:MASCULINO:LIMA:PFIZER:359:79:false
+pred:44:MASCULINO:LIMA:PFIZER:444:164:false
+pred:21:MASCULINO:LIMA:PFIZER:421:141:false
+...
+203
