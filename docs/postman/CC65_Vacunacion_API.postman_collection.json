@@ -1,0 +1,292 @@
+{
+  "info": {
+    "_postman_id": "cc65-vac-2026-caso7-pc4",
+    "name": "CC65 — API Vacunación Nacional (Caso 7)",
+    "description": "Colección de pruebas de la API coordinadora del clúster ML.\n\n**Trabajo Final CC65 — Entregable 2 (PC4)**\n\nEl enunciado exige que la API responda en menos de 100 ms. Cada solicitud de esta colección incluye una prueba automática que verifica ese requisito, de modo que al ejecutar la colección completa con el Runner se obtiene la evidencia de cumplimiento.\n\n**Antes de ejecutar:** levantar el sistema con `docker compose up -d`.\n\nLa variable `token` se completa automáticamente al ejecutar la solicitud de login; el resto de solicitudes la toman de ahí.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8090", "type": "string"},
+    {"key": "token", "value": "", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "1. Salud del servicio",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Servicio operativo', () => pm.expect(d.estado).to.eql('operativo'));",
+          "pm.test('Modelo cargado', () => pm.expect(d.componentes.modelo).to.be.true);",
+          "pm.test('MongoDB conectado', () => pm.expect(d.componentes.mongodb).to.be.true);",
+          "pm.test('Redis conectado', () => pm.expect(d.componentes.redis).to.be.true);",
+          "console.log('Latencia: ' + pm.response.responseTime + ' ms');"
+        ]}
+      }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{base_url}}/api/salud", "host": ["{{base_url}}"], "path": ["api", "salud"]},
+        "description": "Verifica que la API esté operativa y que sus tres dependencias respondan. No requiere autenticación."
+      }
+    },
+    {
+      "name": "2. Login — obtener token JWT",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Devuelve un token', () => pm.expect(d.token).to.be.a('string').and.not.empty);",
+          "pm.test('El token tiene tres partes (JWT)', () => pm.expect(d.token.split('.')).to.have.lengthOf(3));",
+          "pm.test('Rol administrador', () => pm.expect(d.rol).to.eql('administrador'));",
+          "pm.collectionVariables.set('token', d.token);",
+          "console.log('Token guardado (' + d.token.length + ' caracteres)');"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"usuario\": \"admin\",\n  \"contrasena\": \"minsa2026\"\n}"},
+        "url": {"raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api", "login"]},
+        "description": "Autentica al usuario y guarda el token JWT en la variable de colección para las siguientes solicitudes."
+      }
+    },
+    {
+      "name": "3. Login — credenciales incorrectas (401)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Rechaza con 401', () => pm.response.to.have.status(401));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "pm.test('Incluye mensaje de error', () => pm.expect(pm.response.json().error).to.exist);"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"usuario\": \"admin\",\n  \"contrasena\": \"clave-incorrecta\"\n}"},
+        "url": {"raw": "{{base_url}}/api/login", "host": ["{{base_url}}"], "path": ["api", "login"]},
+        "description": "Comprueba que la API rechaza credenciales inválidas."
+      }
+    },
+    {
+      "name": "4. Predecir sin token (401)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Rechaza con 401', () => pm.response.to.have.status(401));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"edad\": 15,\n  \"sexo\": \"MASCULINO\",\n  \"departamento\": \"CUSCO\"\n}"},
+        "url": {"raw": "{{base_url}}/api/predecir", "host": ["{{base_url}}"], "path": ["api", "predecir"]},
+        "description": "Verifica que los endpoints protegidos exigen el token JWT."
+      }
+    },
+    {
+      "name": "5. Predecir — adolescente fuera de Lima (riesgo ALTO)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Probabilidad entre 0 y 1', () => {",
+          "  pm.expect(d.probabilidad_desercion).to.be.at.least(0);",
+          "  pm.expect(d.probabilidad_desercion).to.be.at.most(1);",
+          "});",
+          "pm.test('Clasifica como DESERTARÁ', () => pm.expect(d.clasificacion).to.eql('DESERTARÁ'));",
+          "pm.test('Nivel de riesgo ALTO', () => pm.expect(d.nivel_riesgo).to.eql('ALTO'));",
+          "pm.test('Incluye recomendación', () => pm.expect(d.recomendacion).to.be.a('string').and.not.empty);",
+          "console.log('p=' + d.probabilidad_desercion + '  riesgo=' + d.nivel_riesgo + '  ' + pm.response.responseTime + ' ms');"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"edad\": 15,\n  \"sexo\": \"MASCULINO\",\n  \"departamento\": \"CUSCO\",\n  \"fabricante\": \"PFIZER\",\n  \"dias_desde_primera_dosis\": 400,\n  \"intervalo_entre_dosis\": 25,\n  \"grupo_riesgo_priorizado\": false\n}"},
+        "url": {"raw": "{{base_url}}/api/predecir", "host": ["{{base_url}}"], "path": ["api", "predecir"]},
+        "description": "Perfil de mayor riesgo según el modelo: la condición de menor de dieciocho años presenta el coeficiente positivo más alto."
+      }
+    },
+    {
+      "name": "6. Predecir — adulto mayor en Lima (riesgo BAJO)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Clasifica como COMPLETARÁ', () => pm.expect(d.clasificacion).to.eql('COMPLETARÁ'));",
+          "pm.test('Nivel de riesgo BAJO', () => pm.expect(d.nivel_riesgo).to.eql('BAJO'));",
+          "console.log('p=' + d.probabilidad_desercion + '  riesgo=' + d.nivel_riesgo + '  ' + pm.response.responseTime + ' ms');"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"edad\": 68,\n  \"sexo\": \"FEMENINO\",\n  \"departamento\": \"LIMA\",\n  \"fabricante\": \"PFIZER\",\n  \"dias_desde_primera_dosis\": 900,\n  \"intervalo_entre_dosis\": 420,\n  \"grupo_riesgo_priorizado\": true\n}"},
+        "url": {"raw": "{{base_url}}/api/predecir", "host": ["{{base_url}}"], "path": ["api", "predecir"]},
+        "description": "Perfil opuesto al anterior: adulto mayor con seguimiento sostenido a lo largo del tiempo."
+      }
+    },
+    {
+      "name": "7. Caché Redis — primera llamada (calcula)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {"type": "text/javascript", "exec": [
+            "// Genera un perfil distinto en cada ejecución para que la caché",
+            "// esté necesariamente vacía en la primera llamada.",
+            "pm.collectionVariables.set('edad_unica', 20 + Math.floor(Math.random() * 50));",
+            "pm.collectionVariables.set('dias_unico', 500 + Math.floor(Math.random() * 300));"
+          ]}
+        },
+        {
+          "listen": "test",
+          "script": {"type": "text/javascript", "exec": [
+            "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+            "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+            "const d = pm.response.json();",
+            "pm.test('NO proviene de la caché (fallo esperado)', () => pm.expect(d.desde_cache).to.be.false);",
+            "console.log('desde_cache=' + d.desde_cache + '  ' + pm.response.responseTime + ' ms');"
+          ]}
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"edad\": {{edad_unica}},\n  \"sexo\": \"FEMENINO\",\n  \"departamento\": \"TACNA\",\n  \"fabricante\": \"MODERNA\",\n  \"dias_desde_primera_dosis\": {{dias_unico}},\n  \"intervalo_entre_dosis\": 45\n}"},
+        "url": {"raw": "{{base_url}}/api/predecir", "host": ["{{base_url}}"], "path": ["api", "predecir"]},
+        "description": "Primera consulta de un perfil generado al azar: la caché está vacía y la API debe calcular la predicción."
+      }
+    },
+    {
+      "name": "8. Caché Redis — segunda llamada (acierto)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Proviene de la caché (acierto esperado)', () => pm.expect(d.desde_cache).to.be.true);",
+          "console.log('desde_cache=' + d.desde_cache + '  ' + pm.response.responseTime + ' ms');"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"edad\": {{edad_unica}},\n  \"sexo\": \"FEMENINO\",\n  \"departamento\": \"TACNA\",\n  \"fabricante\": \"MODERNA\",\n  \"dias_desde_primera_dosis\": {{dias_unico}},\n  \"intervalo_entre_dosis\": 45\n}"},
+        "url": {"raw": "{{base_url}}/api/predecir", "host": ["{{base_url}}"], "path": ["api", "predecir"]},
+        "description": "Repite exactamente el mismo perfil de la solicitud anterior: la respuesta debe provenir de Redis."
+      }
+    },
+    {
+      "name": "9. Validación — edad fuera de rango (400)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Rechaza con 400', () => pm.response.to.have.status(400));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "pm.test('Explica el motivo', () => pm.expect(pm.response.json().error).to.include('edad'));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"edad\": 200,\n  \"sexo\": \"MASCULINO\",\n  \"departamento\": \"LIMA\"\n}"},
+        "url": {"raw": "{{base_url}}/api/predecir", "host": ["{{base_url}}"], "path": ["api", "predecir"]},
+        "description": "La API valida que la edad esté entre 0 y 120 años antes de calcular."
+      }
+    },
+    {
+      "name": "10. Predecir lote — 5 perfiles en paralelo",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Devuelve los 5 resultados', () => pm.expect(d.total).to.eql(5));",
+          "pm.test('Cada resultado tiene probabilidad', () => {",
+          "  d.resultados.forEach(r => pm.expect(r.probabilidad_desercion).to.be.a('number'));",
+          "});",
+          "console.log('5 perfiles en ' + d.latencia_ms + ' ms (' + d.latencia_por_item + ' ms por item)');"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {"mode": "raw", "raw": "[\n  {\"edad\": 15, \"sexo\": \"MASCULINO\", \"departamento\": \"CUSCO\", \"fabricante\": \"PFIZER\", \"dias_desde_primera_dosis\": 400, \"intervalo_entre_dosis\": 25},\n  {\"edad\": 45, \"sexo\": \"FEMENINO\", \"departamento\": \"LIMA\", \"fabricante\": \"SINOPHARM\", \"dias_desde_primera_dosis\": 800, \"intervalo_entre_dosis\": 380, \"grupo_riesgo_priorizado\": true},\n  {\"edad\": 70, \"sexo\": \"MASCULINO\", \"departamento\": \"PUNO\", \"fabricante\": \"\", \"dias_desde_primera_dosis\": 600, \"intervalo_entre_dosis\": 30},\n  {\"edad\": 8, \"sexo\": \"FEMENINO\", \"departamento\": \"LORETO\", \"fabricante\": \"PFIZER\", \"dias_desde_primera_dosis\": 300, \"intervalo_entre_dosis\": 21},\n  {\"edad\": 32, \"sexo\": \"MASCULINO\", \"departamento\": \"AREQUIPA\", \"fabricante\": \"ASTRAZENECA\", \"dias_desde_primera_dosis\": 1000, \"intervalo_entre_dosis\": 500}\n]"},
+        "url": {"raw": "{{base_url}}/api/predecir/lote", "host": ["{{base_url}}"], "path": ["api", "predecir", "lote"]},
+        "description": "El endpoint de lote lanza una goroutine por elemento y devuelve la latencia total junto con la media por elemento."
+      }
+    },
+    {
+      "name": "11. Métricas del servicio",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "pm.test('Latencia menor a 100 ms', () => pm.expect(pm.response.responseTime).to.be.below(100));",
+          "const d = pm.response.json();",
+          "pm.test('Cumple el requisito de 100 ms', () => pm.expect(d.cumple_sla_100ms).to.be.true);",
+          "pm.test('El percentil 99 es menor a 100 ms', () => pm.expect(d.latencia_ms.p99).to.be.below(100));",
+          "pm.test('MongoDB activo', () => pm.expect(d.mongodb.activo).to.be.true);",
+          "pm.test('Redis activo', () => pm.expect(d.cache_redis.activo).to.be.true);",
+          "console.log('p99 del servicio: ' + d.latencia_ms.p99 + ' ms sobre ' + d.servicio.predicciones + ' predicciones');"
+        ]}
+      }],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "{{base_url}}/api/metricas", "host": ["{{base_url}}"], "path": ["api", "metricas"]},
+        "description": "Percentiles de latencia, estado de la caché y de la base de datos, y métricas del modelo."
+      }
+    },
+    {
+      "name": "12. Especificación OpenAPI (Swagger)",
+      "event": [{
+        "listen": "test",
+        "script": {"type": "text/javascript", "exec": [
+          "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+          "const d = pm.response.json();",
+          "pm.test('Es OpenAPI 3.0', () => pm.expect(d.openapi).to.include('3.0'));",
+          "pm.test('Documenta todos los endpoints', () => pm.expect(Object.keys(d.paths).length).to.be.at.least(6));",
+          "pm.test('Define el esquema de seguridad', () => pm.expect(d.components.securitySchemes.BearerAuth).to.exist);"
+        ]}
+      }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{base_url}}/swagger.json", "host": ["{{base_url}}"], "path": ["swagger.json"]},
+        "description": "La propia API sirve su especificación OpenAPI, que Swagger UI renderiza en /swagger."
+      }
+    }
+  ]
+}

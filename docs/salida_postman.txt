@@ -1,0 +1,30 @@
+======================================================================
+COLECCION POSTMAN — VERIFICACION DE LAS 12 SOLICITUDES
+======================================================================
+  coleccion : CC65 — API Vacunación Nacional (Caso 7)
+  base_url  : http://localhost:8090
+  requisito : cada solicitud debe responder en menos de 100 ms
+======================================================================
+
+  #   solicitud                                     HTTP         ms
+  ------------------------------------------------------------------
+  1   Salud del servicio                            200       37.67  PASA
+  2   Login — obtener token JWT                     200        2.20  PASA
+  3   Login — credenciales incorrectas (401)        401        2.11  PASA
+  4   Predecir sin token (401)                      401        2.31  PASA
+  5   Predecir — adolescente fuera de Lima (riesgo  200        3.23  PASA
+  6   Predecir — adulto mayor en Lima (riesgo BAJO) 200        3.14  PASA
+  7   Caché Redis — primera llamada (calcula)       200        2.24  PASA
+  8   Caché Redis — segunda llamada (acierto)       200        2.13  PASA
+  9   Validación — edad fuera de rango (400)        400       25.71  PASA
+  10  Predecir lote — 5 perfiles en paralelo        200        3.20  PASA
+  11  Métricas del servicio                         200        2.87  PASA
+  12  Especificación OpenAPI (Swagger)              200        2.05  PASA
+  ------------------------------------------------------------------
+
+  solicitudes que pasan : 12/12
+  latencia maxima       : 37.67 ms
+  latencia media        : 7.41 ms
+
+  TODAS CUMPLEN EL REQUISITO DE 100 ms: SI
+======================================================================
