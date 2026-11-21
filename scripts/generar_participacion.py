@@ -16,7 +16,7 @@ from docx import Document
 
 RAIZ = Path(__file__).resolve().parents[1]
 PLANTILLA = Path(r"C:\Users\Yago Caldas\Downloads\CC65-Participación-202620 .docx")
-SALIDA = RAIZ / "CC65-Participación-202620.docx"
+SALIDA = RAIZ / "CC65-Participación-202620-PC4.docx"
 
 # --------------------------------------------------------------------------
 # Reparto de responsabilidades: cuatro por integrante, equivalentes en carga.
@@ -25,49 +25,48 @@ SALIDA = RAIZ / "CC65-Participación-202620.docx"
 # --------------------------------------------------------------------------
 RESPONSABILIDADES = {
     "Andre Angel Chipana Rios": [
-        "Validación del modelo de clasificación: revisión de la matriz de confusión global y "
-        "análisis de las métricas de exactitud, precisión, exhaustividad y F1 obtenidas sobre "
-        "los 30,816,349 registros etiquetados.",
-        "Análisis del umbral de decisión: evaluación del compromiso entre precisión y "
-        "exhaustividad y su implicancia para una campaña de salud pública.",
-        "Interpretación de los coeficientes del modelo y su lectura en términos de política "
-        "pública, identificando a la población pediátrica como grupo de mayor deserción.",
-        "Elaboración de las conclusiones y recomendaciones del informe, incluidas las "
-        "limitaciones declaradas y las líneas de mejora para la PC4.",
+        "Diseño de las entidades de MongoDB: definición de las tres colecciones, el esquema de "
+        "validación de documentos y los cinco índices que optimizan las consultas del panel.",
+        "Configuración de Redis como caché de respuestas precalculadas: estrategia de claves por "
+        "perfil, tiempo de vida de una hora y política de desalojo allkeys-lru.",
+        "Pruebas de funcionamiento de las bases de datos: verificación de la persistencia de 203 "
+        "predicciones y de las agregaciones por nivel de riesgo.",
+        "Elaboración de las conclusiones y recomendaciones del informe de la PC4.",
     ],
     "Ernesto Yago Caldas Zapata": [
-        "Parte A: cargador concurrente del CSV del MINSA mediante Worker Pool con fan-out y "
-        "fan-in sobre channels, procesando 93,675,827 registros en 7.80 segundos.",
-        "Etiquetado de la deserción por partición de hash del UUID, reconstruyendo las "
-        "trayectorias de 30,968,883 personas sin recurrir a un mapa compartido con cerrojo.",
-        "Parte B: protocolo TCP, coordinador y nodos del clúster bajo el patrón Parameter "
-        "Server, con entrenamiento distribuido sobre cuatro nodos.",
-        "Gestión del repositorio con Git Flow, tablero Kanban en GitHub Projects y redacción "
-        "del informe.",
+        "Desarrollo de la API coordinadora en Go: endpoints REST, autenticación con tokens JWT "
+        "firmados con HMAC-SHA256 y canal WebSocket conforme al RFC 6455.",
+        "Implementación de los clientes de MongoDB y Redis sobre la biblioteca estándar, con los "
+        "protocolos OP_MSG y RESP escritos para el proyecto.",
+        "Contenerización del sistema y orquestación con Docker Compose, incluidas las "
+        "comprobaciones de salud y la red interna del clúster.",
+        "Gestión del repositorio con Git Flow, actualización del tablero Kanban y redacción del "
+        "informe de la PC4.",
     ],
     "Ricardo Rafael Rivas Carrillo": [
-        "Identificación y validación de la fuente de datos: localización del Registro Nacional "
-        "de Vacunación del MINSA y de su enlace efectivo de descarga.",
-        "Interpretación del caso 7 asignado y verificación de la correspondencia entre el "
-        "planteamiento del problema y el algoritmo de Regresión Logística Distribuida.",
-        "Benchmark de escalabilidad: medición del Speedup y la eficiencia para 2, 4, 6, 8, 12 "
-        "y 16 trabajadores, con diez corridas por configuración y media recortada.",
-        "Redacción de la sección de paralelización del informe: técnicas, patrones de "
-        "concurrencia en Go y justificación del planteamiento.",
+        "Justificación de la topología de red del clúster: análisis comparativo entre estrella, "
+        "malla y anillo frente a las necesidades del descenso de gradiente distribuido.",
+        "Documentación de la API con OpenAPI 3.0: definición de los siete esquemas de datos y de "
+        "los ejemplos de solicitud de cada endpoint.",
+        "Ejecución de las pruebas de latencia sobre el servicio contenerizado y verificación del "
+        "cumplimiento del requisito de responder en menos de 100 milisegundos.",
+        "Redacción de las secciones de distribución y protocolo de comunicación TCP del informe.",
     ],
 }
 
-COMENTARIO = """Los tres integrantes cumplieron con las responsabilidades asignadas para la PC3 y cada uno tiene commits propios en el repositorio, visibles en el historial bajo su cuenta de GitHub.
+COMENTARIO = """Los tres integrantes cumplieron con las responsabilidades asignadas para la PC4 y cada uno tiene commits propios en el repositorio.
 
-El trabajo se organizó en tres frentes que corresponden a las partes de la arquitectura definida en el enunciado. Ricardo Rivas identificó la fuente de datos y resolvió un obstáculo que bloqueaba el avance: la ficha del conjunto de datos en la Plataforma Nacional de Datos Abiertos redirige al formulario de inicio de sesión, y el archivo real se sirve desde el repositorio institucional del MINSA. También interpretó correctamente que el caso 7 se refiere a la vacunación contra la COVID-19, y se encargó del benchmark de escalabilidad.
+En esta entrega se completaron la Parte C de la arquitectura —la API coordinadora REST y WebSocket— junto con los dos niveles de almacenamiento y el despliegue contenerizado del sistema. El servicio expone el modelo entrenado sobre 30,816,349 registros y responde con una latencia media de 3.48 milisegundos; el percentil 99 es de 5.39 milisegundos, aproximadamente dieciocho veces por debajo del umbral de 100 milisegundos que fija el enunciado.
 
-Ernesto Yago Caldas Zapata implementó la Parte A (cargador concurrente) y la Parte B (motor de entrenamiento distribuido) de la arquitectura, además de coordinar la integración de ramas y el tablero Kanban. El sistema procesa los 93,675,827 registros del Registro Nacional de Vacunación en 7.80 segundos a 1,301 MB/s, reconstruye las trayectorias de 30,968,883 personas y entrena un modelo de Regresión Logística sobre un clúster de cuatro nodos comunicados por TCP.
+Ricardo Rivas se encargó de justificar la topología de red del clúster, comparando las alternativas de estrella, malla y anillo frente a las necesidades del descenso de gradiente distribuido, y documentó la API en OpenAPI 3.0. También ejecutó las pruebas de latencia sobre el servicio contenerizado.
 
-Andre Chipana se encargó de la validación del modelo y de la interpretación de sus resultados en términos de política pública, así como de las conclusiones y recomendaciones del informe. Su revisión identificó que el coeficiente de mayor peso positivo corresponde a la condición de menor de dieciocho años, lo que señala a la población pediátrica como el grupo prioritario para las campañas de seguimiento.
+Ernesto Yago Caldas Zapata desarrolló la API en Go con autenticación JWT y canal WebSocket conforme al RFC 6455, implementó los clientes de MongoDB y Redis sobre la biblioteca estándar —con los protocolos OP_MSG y RESP escritos para el proyecto, en lugar de incorporar los SDK oficiales— y orquestó el despliegue con Docker Compose.
 
-Dos hallazgos surgidos de la verificación de resultados intermedios merecen mención. El primero: 17,105 registros de pacientes con comorbilidades cardíacas eran descartados silenciosamente por el analizador sintáctico inicial, al contener un punto y coma dentro de un campo entrecomillado; el analizador se corrigió para recuperarlos. El segundo: el primer entrenamiento no había convergido —la norma del gradiente permanecía en 0.0317— y sus métricas subestimaban la capacidad real del modelo, por lo que se repitió con una configuración adecuada, elevando la exhaustividad de 0.3258 a 0.5714.
+Andre Chipana diseñó las entidades de MongoDB con su validación de esquema e índices, configuró Redis como caché de respuestas precalculadas y verificó el funcionamiento de ambos almacenamientos.
 
-El seguimiento se gestionó mediante un tablero Kanban público en GitHub Projects con doce tareas: las siete de esta entrega figuran en la columna Done y las cinco restantes, correspondientes a la PC4 y al TB2, permanecen en Todo.
+Durante el desarrollo se corrigió un defecto en la propia batería de pruebas que merece mención. La prueba destinada a demostrar el funcionamiento de la caché reportaba éxito, pero ambas llamadas provenían de Redis porque el perfil consultado coincidía con el de una prueba anterior del mismo script: la prueba pasaba por una razón equivocada y no demostraba el comportamiento que afirmaba verificar. Se corrigió para emplear un perfil generado aleatoriamente, y solo entonces la evidencia mostró la secuencia de fallo seguido de acierto.
+
+El tablero Kanban registra diez de las doce tareas completadas; las dos restantes corresponden al frontend y a la evaluación experimental del TB2.
 
 Repositorio: https://github.com/yagocz/cc65-vacunacion-nacional
 Tablero Kanban: https://github.com/users/yagocz/projects/1"""
@@ -124,7 +123,7 @@ def main():
 
     # ---- Tabla 0: datos de la entrega ----
     t0 = doc.tables[0]
-    set_celda(t0.rows[0].cells[1], "PC3")
+    set_celda(t0.rows[0].cells[1], "PC4")
     set_celda(t0.rows[1].cells[1], "Grupo 1 — CC65")
     set_celda(t0.rows[2].cells[1],
               "Clasificación y Seguimiento de la Vacunación Nacional: predicción de deserción "
