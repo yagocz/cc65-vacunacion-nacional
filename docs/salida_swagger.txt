@@ -1,0 +1,30 @@
+==============================================================
+DOCUMENTACION OpenAPI / SWAGGER
+==============================================================
+  Swagger UI : http://localhost:8090/swagger
+  OpenAPI    : http://localhost:8090/swagger.json
+
+  titulo  : API de Predicción de Deserción Vacunal
+  version : 1.0.0
+  OpenAPI : 3.0.3
+
+  ENDPOINTS DOCUMENTADOS
+  --------------------------------------------------------
+  GET    /api/salud             Estado del servicio
+  POST   /api/login             Obtener token JWT
+  POST   /api/predecir          Predecir la deserción de un perfil  [requiere JWT]
+  POST   /api/predecir/lote     Predecir un lote de perfiles  [requiere JWT]
+  GET    /api/metricas          Métricas del servicio y del clúster  [requiere JWT]
+  GET    /ws                    Canal WebSocket en tiempo real
+
+  ESQUEMAS DEFINIDOS
+  --------------------------------------------------------
+   - Credenciales
+   - TokenJWT
+   - SolicitudPrediccion
+   - RespuestaPrediccion
+   - RespuestaLote
+   - Salud
+   - Metricas
+
+  SEGURIDAD: BearerAuth (HS256)

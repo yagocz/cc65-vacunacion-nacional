@@ -28,3 +28,8 @@ desktop.ini
 !docs/capturas/*.png
 *.zip
 ~$*
+
+# binarios y temporales
+go/*.exe
+bin/
+scripts/__pycache__/

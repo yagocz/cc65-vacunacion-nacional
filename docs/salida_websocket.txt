@@ -1,0 +1,23 @@
+==============================================================
+PRUEBA DEL CANAL WEBSOCKET EN TIEMPO REAL
+==============================================================
+  destino : ws://localhost:8090/ws
+
+  token obtenido (176 caracteres)
+  handshake: HTTP/1.1 101 Switching Protocols
+  conexión establecida (RFC 6455)
+
+  MENSAJES RECIBIDOS
+  ----------------------------------------------------------
+  [1] bienvenida: 205 predicciones acumuladas, latencia media 0.2573 ms
+  [2] predicción: CUSCO      edad 10  p=0.8794 riesgo ALTO
+  [3] predicción: LIMA       edad 25  p=0.5766 riesgo MEDIO
+  [4] predicción: PUNO       edad 40  p=0.5114 riesgo MEDIO
+  [5] predicción: LORETO     edad 55  p=0.4490 riesgo BAJO
+  [6] predicción: AREQUIPA   edad 70  p=0.3755 riesgo BAJO
+  [7] latido: 210 predicciones, 1 cliente(s) conectado(s)
+
+  ----------------------------------------------------------
+  total de mensajes recibidos: 7
+  RESULTADO: canal operativo
+==============================================================
