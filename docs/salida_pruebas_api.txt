@@ -1,0 +1,108 @@
+==============================================================
+PRUEBAS DE LA API COORDINADORA
+==============================================================
+  base   : http://localhost:8090
+  fecha  : 2026-11-21 11:56:54
+==============================================================
+
+### 1. GET /api/salud — estado del servicio (sin autenticación)
+{"componentes":{"modelo":true,"mongodb":true,"redis":true},"estado":"operativo","version":"1.0.0-pc4"}
+
+  ? HTTP 200 | 0.004313s
+
+### 2. POST /api/login — autenticación y emisión de JWT
+{"expira_seg":28800,"rol":"administrador","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbCI6ImFkbWluaXN0cmFkb3IiLCJleHAiOjE3OTUzMDkwMTQsImlhdCI6MTc5NTI4MDIxNH0.6Ccp3QgHRGk2P0_DujIajwwDsJc1-Bp2wS7wTUVgu0M","usuario":"admin"}
+
+  → token obtenido (176 caracteres)
+
+### 3. POST /api/login — credenciales incorrectas (debe dar 401)
+  ? HTTP 401
+
+### 4. POST /api/predecir sin token (debe dar 401)
+  ? HTTP 401
+
+### 5. POST /api/predecir — adolescente fuera de Lima
+    Perfil: 15 años, masculino, CUSCO, Pfizer, intervalo corto
+{"probabilidad_desercion":0.876687,"clasificacion":"DESERTARÁ","nivel_riesgo":"ALTO","recomendacion":"Contacto telefónico prioritario y visita domiciliaria de brigada móvil.","latencia_ms":1.722,"desde_cache":false}
+
+  ? HTTP 200 | tiempo total 0.005306s
+
+### 6. POST /api/predecir — adulto mayor en Lima con seguimiento sostenido
+    Perfil: 68 años, femenino, LIMA, Pfizer, intervalo largo
+{"probabilidad_desercion":0.115108,"clasificacion":"COMPLETARÁ","nivel_riesgo":"BAJO","recomendacion":"Seguimiento regular según el calendario de vacunación.","latencia_ms":0.763,"desde_cache":false}
+
+  ? HTTP 200 | tiempo total 0.003948s
+
+### 7. Caché de Redis: fallo y acierto sobre un perfil nuevo
+    (la primera llamada calcula; la segunda debe venir de la caché)
+    llamada 1: desde_cache=False  latencia=0.203 ms
+    llamada 2: desde_cache=True  latencia=0.384 ms
+
+### 8. Validación de entrada: edad fuera de rango (debe dar 400)
+{"error":"la edad debe estar entre 0 y 120 años"}
+
+  ? HTTP 400
+
+### 9. POST /api/predecir/lote — 5 perfiles en paralelo
+  total: 5 | latencia 0.117 ms | por item 0.0234 ms
+    1. p=0.8767  DESERTARÁ  riesgo ALTO
+    2. p=0.1248  COMPLETARÁ riesgo BAJO
+    3. p=0.7029  DESERTARÁ  riesgo ALTO
+    4. p=0.8799  DESERTARÁ  riesgo ALTO
+    5. p=0.0710  COMPLETARÁ riesgo BAJO
+
+### 10. Prueba de latencia: 200 solicitudes consecutivas
+    Requisito del enunciado: la API debe responder en menos de 100 ms
+    solicitudes : 200
+    media       : 3.48 ms
+    m�nimo      : 2.81 ms
+    p50         : 3.29 ms
+    p95         : 4.44 ms
+    p99         : 5.39 ms
+    m�ximo      : 12.91 ms
+
+    CUMPLE EL REQUISITO (p99 < 100 ms): S�
+
+### 11. GET /api/metricas — métricas del servicio
+{
+    "cache_redis": {
+        "aciertos": 1,
+        "activo": true,
+        "claves": 204,
+        "fallos": 203,
+        "tasa_acierto": 0.0049
+    },
+    "cumple_sla_100ms": true,
+    "latencia_ms": {
+        "max": 1.722,
+        "media": 0.2573,
+        "p50": 0.236,
+        "p95": 0.324,
+        "p99": 0.456
+    },
+    "modelo": {
+        "algoritmo": "Regresi\u00c3\u00b3n Log\u00c3\u00adstica Distribuida",
+        "caracteristicas": 15,
+        "metricas": {
+            "exactitud": 0.8482922814769523,
+            "exhaustividad": 0.5713902184208075,
+            "f1": 0.6709003312764067,
+            "precision": 0.812379844595174
+        },
+        "muestras_entrenamiento": 30816349
+    },
+    "mongodb": {
+        "activo": true,
+        "predicciones_guardadas": 203
+    },
+    "servicio": {
+        "activo_desde": "2026-11-21T16:56:34Z",
+        "clientes_ws": 0,
+        "predicciones": 205,
+        "tiempo_activo_seg": 34
+    }
+}
+
+==============================================================
+FIN DE LAS PRUEBAS
+==============================================================

@@ -1,0 +1,14 @@
+[mongo] conectado a localhost:27017, base de datos "vacunacion"
+[redis] conectado a localhost:6380
+==============================================================
+API COORDINADORA — Vacunación Nacional (Caso 7)
+==============================================================
+  modelo cargado   : 15 características
+  exactitud        : 0.8483   F1: 0.6709
+  MongoDB          : true
+  Redis            : true
+--------------------------------------------------------------
+  REST   : http://localhost:8090/api/...
+  Swagger: http://localhost:8090/swagger
+  WS     : ws://localhost:8090/ws
+==============================================================
